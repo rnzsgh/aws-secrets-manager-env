@@ -1,2 +1,4 @@
 *.swp
 aws-secrets-manager-env
+main
+test.go
