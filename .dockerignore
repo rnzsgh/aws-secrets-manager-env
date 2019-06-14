@@ -1,0 +1,7 @@
+*.swp
+.git
+.gitignore
+.DS_Store
+README.md
+Dockerfile
+aws-secrets-manager-env
