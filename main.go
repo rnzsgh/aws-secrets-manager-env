@@ -27,12 +27,6 @@ func init() {
 
 func main() {
 
-	fmt.Println(os.Args)
-
-	if len(os.Args) < 2 {
-		log.Fatalf("You must pass the name of the secrets to load - e.g., aws-secrets-manager-env prod/appA prod/common")
-	}
-
 	region := region()
 	if len(region) == 0 {
 		log.Infof("Outside of AWS - not looking up or setting environment variables from Secrets Manager")
@@ -45,24 +39,13 @@ func main() {
 	)
 
 	for _, s := range secretNames {
-		log.Infof("secret: %s", s)
-		//log.Infof("Loading - secret: %s", os.Args[i])
+		log.Infof("Loading secret: %s", s)
 		if err := secret(svc, s); err != nil {
 			log.Fatal(err)
 			os.Exit(1)
 		}
 
 	}
-
-	/*
-		for i := 0; i < len(os.Args); i++ {
-			log.Infof("Loading - secret: %s", os.Args[i])
-				if err := secret(svc, os.Args[i]); err != nil {
-					log.Fatal(err)
-					os.Exit(1)
-				}
-		}
-	*/
 
 	log.Flush()
 }
