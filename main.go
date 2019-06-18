@@ -33,19 +33,11 @@ func main() {
 		log.Fatalf("You must pass the name of the secrets to load - e.g., aws-secrets-manager-env prod/appA prod/common")
 	}
 
-	/*
-
-		region := region()
-		if len(region) == 0 {
-			log.Infof("Outside of AWS - not looking up or setting environment variables from Secrets Manager")
-			return
-		}
-
-	*/
-
-	region := "us-east-1"
-
-	log.Infof("region %s", region)
+	region := region()
+	if len(region) == 0 {
+		log.Infof("Outside of AWS - not looking up or setting environment variables from Secrets Manager")
+		return
+	}
 
 	svc := secretsmanager.New(
 		session.New(),
