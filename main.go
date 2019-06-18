@@ -6,7 +6,9 @@ import (
 	"flag"
 	"fmt"
 	"io/ioutil"
+	"net"
 	"net/http"
+	"net/url"
 	"os"
 	"time"
 
@@ -86,7 +88,17 @@ func region() string {
 	client := http.Client{Timeout: time.Duration(40 * time.Millisecond)}
 	r, err := client.Get("http://169.254.169.254/latest/dynamic/instance-identity/document")
 	if err != nil {
-		log.Error(err)
+		switch err := err.(type) {
+		case net.Error:
+			if !err.Timeout() {
+				log.Errorf("Cannot query metadata - reason %v", err)
+			}
+		case *url.Error:
+			if err, ok := err.Err.(net.Error); ok && !err.Timeout() {
+				log.Errorf("Cannot query metadata - reason %v", err)
+			}
+		}
+
 		return ""
 	}
 	defer r.Body.Close()
