@@ -6,7 +6,6 @@ import (
 	"flag"
 	"fmt"
 	"io/ioutil"
-	"net"
 	"net/http"
 	"os"
 	"time"
@@ -38,15 +37,6 @@ func main() {
 	}
 
 	log.Infof("region %s", region)
-
-	ips, err := net.LookupIP("google.com")
-	if err != nil {
-		log.Infof("Could not get IPs: %v", err)
-	}
-
-	for _, ip := range ips {
-		log.Infof("google.com. IN A %s", ip.String())
-	}
 
 	svc := secretsmanager.New(
 		session.New(),
