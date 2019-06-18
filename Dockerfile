@@ -10,12 +10,16 @@ RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o aws-secrets-manag
 
 RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o test test.go
 
-FROM scratch
+RUN chmod ugo+x execute.sh
+
+FROM alpine
+RUN apk update && apk add bash
 
 COPY --from=builder /build/aws-secrets-manager-env /aws-secrets-manager-env
 COPY --from=builder /build/test /test
+COPY --from=builder /build/execute.sh /execute.sh
 COPY --from=builder /etc/passwd /etc/passwd
 COPY --from=builder /etc/ssl/certs /etc/ssl/certs
 USER app
 
-CMD [ "/aws-secrets-manager-env", "--secret=/prod/test", "--secret=prod/test", "--", "/test" ]
+CMD [ "/execute.sh" ]
