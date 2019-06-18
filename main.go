@@ -17,7 +17,10 @@ import (
 	log "github.com/golang/glog"
 )
 
+var secretNames arrayFlags
+
 func init() {
+	flag.Var(&secretNames, "secret", "Some description for this param.")
 	flag.Parse()
 	flag.Lookup("logtostderr").Value.Set("true")
 }
@@ -30,11 +33,17 @@ func main() {
 		log.Fatalf("You must pass the name of the secrets to load - e.g., aws-secrets-manager-env prod/appA prod/common")
 	}
 
-	region := region()
-	if len(region) == 0 {
-		log.Infof("Outside of AWS - not looking up or setting environment variables from Secrets Manager")
-		return
-	}
+	/*
+
+		region := region()
+		if len(region) == 0 {
+			log.Infof("Outside of AWS - not looking up or setting environment variables from Secrets Manager")
+			return
+		}
+
+	*/
+
+	region := "us-east-1"
 
 	log.Infof("region %s", region)
 
@@ -43,12 +52,25 @@ func main() {
 		aws.NewConfig().WithRegion(region).WithMaxRetries(3),
 	)
 
-	for i := 1; i < len(os.Args); i++ {
-		log.Infof("Loading - secret: %s", os.Args[i])
-		if err := secret(svc, os.Args[i]); err != nil {
+	for _, s := range secretNames {
+		log.Infof("secret: %s", s)
+		//log.Infof("Loading - secret: %s", os.Args[i])
+		if err := secret(svc, s); err != nil {
 			log.Fatal(err)
+			os.Exit(1)
 		}
+
 	}
+
+	/*
+		for i := 0; i < len(os.Args); i++ {
+			log.Infof("Loading - secret: %s", os.Args[i])
+				if err := secret(svc, os.Args[i]); err != nil {
+					log.Fatal(err)
+					os.Exit(1)
+				}
+		}
+	*/
 
 	log.Flush()
 }
@@ -107,4 +129,15 @@ func region() string {
 	}
 
 	return m["region"].(string)
+}
+
+type arrayFlags []string
+
+func (i *arrayFlags) String() string {
+	return "my string representation"
+}
+
+func (i *arrayFlags) Set(value string) error {
+	*i = append(*i, value)
+	return nil
 }
