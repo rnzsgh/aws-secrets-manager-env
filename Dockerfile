@@ -18,6 +18,4 @@ COPY --from=builder /etc/passwd /etc/passwd
 COPY --from=builder /etc/ssl/certs /etc/ssl/certs
 USER app
 
-ENTRYPOINT [ "/aws-secrets-manager-env", "--secret=/prod/test", "--secret=prod/test", "--" ]
-
-CMD [ "/test" ]
+ENTRYPOINT [ "/aws-secrets-manager-env", "--secret=/prod/test", "--secret=prod/test", "&&", "/test" ]
