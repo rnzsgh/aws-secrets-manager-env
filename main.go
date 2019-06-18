@@ -1,10 +1,12 @@
 package main
 
 import (
+	"context"
 	"encoding/json"
 	"flag"
 	"fmt"
 	"io/ioutil"
+	"net"
 	"net/http"
 	"os"
 	"time"
@@ -35,6 +37,17 @@ func main() {
 		return
 	}
 
+	log.Infof("region %s", region)
+
+	ips, err := net.LookupIP("google.com")
+	if err != nil {
+		log.Infof("Could not get IPs: %v", err)
+	}
+
+	for _, ip := range ips {
+		log.Infof("google.com. IN A %s", ip.String())
+	}
+
 	svc := secretsmanager.New(
 		session.New(),
 		aws.NewConfig().WithRegion(region).WithMaxRetries(3),
@@ -52,7 +65,9 @@ func main() {
 
 func secret(svc *secretsmanager.SecretsManager, name string) error {
 
-	result, err := svc.GetSecretValue(&secretsmanager.GetSecretValueInput{
+	ctx, _ := context.WithTimeout(context.Background(), 3*time.Second)
+
+	result, err := svc.GetSecretValueWithContext(ctx, &secretsmanager.GetSecretValueInput{
 		SecretId:     aws.String(name),
 		VersionStage: aws.String("AWSCURRENT"),
 	})
